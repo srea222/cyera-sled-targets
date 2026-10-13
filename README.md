@@ -2,6 +2,8 @@
 
 **Version 1.0 · October 2026 · Companion to the Cyera SLED Market Entry Plan (v2)**
 
+**Live dashboard:** [srea222.github.io/cyera-sled-targets](https://srea222.github.io/cyera-sled-targets/)
+
 This is the working account list for Cyera's State, Local & Education (SLED) build-out: **~105 named organizations across 91 entries**, mapped to the lean three-seller territory model, tiered by when to pursue them, and annotated with the trigger, contract path, and compliance drivers for each.
 
 ## The thesis in one line
