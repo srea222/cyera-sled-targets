@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cyera SLED Command Board</title>
+<style>
+:root{
+  --bg:#f7f7fa; --panel:#ffffff; --ink:#20242e; --muted:#5a6272; --line:#e4e4ec;
+  --navy:#1f2761; --purple:#4b2aad; --vpurple:#7c4fe0; --teal:#1baf7a;
+  --tint:#f1edfb; --chipH:#d64545; --chipM:#c98500; --chipL:#008300;
+  --shadow:0 1px 3px rgba(31,39,97,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#141a3c; --panel:#1d2450; --ink:#e8eaf2; --muted:#a7adc4; --line:#2e366b;
+    --navy:#c9cdf0; --purple:#b9a6f5; --vpurple:#9b79ec; --teal:#2ec493;
+    --tint:#262e63; --chipH:#e06c6c; --chipM:#dfa43a; --chipL:#4fbb4f;
+    --shadow:none;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:0 16px 48px}
+.wrap{max-width:1180px;margin:0 auto}
+a{color:var(--vpurple)}
+header{padding:34px 0 10px}
+.brand{font-size:13px;letter-spacing:.35em;font-weight:700;color:var(--purple);text-transform:uppercase}
+h1{font-size:clamp(26px,4vw,38px);margin:.15em 0 .1em;color:var(--navy);text-wrap:balance}
+.sub{color:var(--muted);max-width:72ch;margin:0 0 10px}
+.toplinks{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 4px}
+.toplinks a{display:inline-block;background:var(--tint);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:13px;text-decoration:none;color:var(--purple);font-weight:600}
+section{margin-top:30px}
+h2{font-size:19px;color:var(--navy);margin:0 0 4px}
+.note{color:var(--muted);font-size:13px;margin:0 0 14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,205px),1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow);min-width:0}
+.kpi .big{font-size:clamp(22px,2.6vw,30px);font-weight:700;color:var(--purple);font-variant-numeric:tabular-nums}
+.kpi .lbl{font-size:13px;font-weight:600;margin-top:2px}
+.kpi .nt{font-size:12px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:12px}
+.chartbox{min-height:280px;position:relative}
+svg text{font:12px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;fill:var(--muted)}
+svg .val{fill:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.legend{display:flex;gap:18px;font-size:13px;color:var(--muted);margin-top:4px;flex-wrap:wrap}
+.sw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:6px 10px;font-size:12px;display:none;z-index:5}
+.terr .tt{font-weight:700;color:var(--purple);font-size:14px}
+.terr .cnt{font-size:12px;color:var(--muted);margin:4px 0 8px}
+.terr ul{margin:0;padding-left:18px;font-size:13px}
+.terr li{margin:3px 0}
+.gates{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:12px}
+.gate b{color:var(--purple)}
+.gate .row{font-size:13.5px;margin:6px 0}
+.calls{columns:2;column-gap:28px;margin:0;padding-left:20px;font-size:14px}
+.calls li{margin:0 0 9px;break-inside:avoid}
+@media (max-width:640px){.calls{columns:1}}
+.clock{display:flex;flex-wrap:wrap;gap:8px}
+.clock span{background:var(--tint);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:12.5px}
+.clock b{color:var(--purple)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.filters input,.filters select{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13.5px}
+.filters input{flex:1;min-width:180px}
+.tblbox{overflow:auto;max-height:560px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:880px}
+th{position:sticky;top:0;background:var(--panel);text-align:left;color:var(--muted);font-size:12px;letter-spacing:.04em;text-transform:uppercase;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.acct{font-weight:600;color:var(--navy)}
+td.why{color:var(--muted);min-width:260px}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:11.5px;font-weight:700;color:#fff}
+.t1{background:var(--purple)} .t2{background:#8a93ae} .t3{background:#b7bccb;color:#20242e}
+.count{color:var(--muted);font-size:13px;margin-top:8px}
+.risk{background:var(--tint);border:1px solid var(--line);border-radius:12px;padding:14px 18px;font-size:14px}
+footer{margin-top:40px;color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="brand">Cyera · SLED</div>
+  <h1>SLED Command Board</h1>
+  <p class="sub">The lean market entry at a glance: one leader + three sellers, an AI-readiness thesis ("you cannot scale frontier AI across data you haven't classified"), and a gated $12M, 36-month plan against a $220M serviceable market. Plan v2 · October 2026.</p>
+  <div class="toplinks">
+    <a href="https://github.com/srea222/cyera-sled-targets">Target list repo</a>
+    <a href="https://github.com/srea222/cyera-sled-targets/blob/main/targets.csv">targets.csv</a>
+    <a href="#targets">Jump to target table</a>
+  </div>
+</header>
+
+<section>
+  <h2>Headline numbers</h2>
+  <div class="cards">
+    <div class="card kpi"><div class="big">$220M</div><div class="lbl">Serviceable market</div><div class="nt">~2,064 named targets, bottoms-up</div></div>
+    <div class="card kpi"><div class="big">$1.9M</div><div class="lbl">Year-1 ask</div><div class="nt">3 AEs at $500K loaded + programs</div></div>
+    <div class="card kpi"><div class="big">$6.5–21.5M</div><div class="lbl">ARR by month 36</div><div class="nt">worst → best case</div></div>
+    <div class="card kpi"><div class="big">$12M</div><div class="lbl">3-year investment</div><div class="nt">gated · ~70% cancellable at Gate 1</div></div>
+    <div class="card kpi"><div class="big">150%</div><div class="lbl">Cyera NRR</div><div class="nt">$1 landed in Y1 ≈ $3.40 by Y4</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>The 36-month model</h2>
+  <p class="note">Exit ARR by year under the lean build (3 AEs → 7 at Gate 1 → ~10 at Gate 2). Hover a bar for detail.</p>
+  <div class="grid2">
+    <div class="card chartbox"><div id="arrchart"></div>
+      <div class="legend"><span><span class="sw" style="background:var(--teal)"></span>Worst case</span><span><span class="sw" style="background:var(--vpurple)"></span>Best case</span></div>
+      <div class="tip" id="tip"></div>
+    </div>
+    <div class="card">
+      <div class="terr"><div class="tt">In-year spend & team</div></div>
+      <div class="gate">
+        <div class="row"><b>Year 1 — $1.9M</b> · Leader + 3 AEs · SEs borrowed from Federal under SLA</div>
+        <div class="row"><b>Year 2 — $4.0M</b> · 7 heads after Gate 1 (AE4–5, dedicated SE, channel manager)</div>
+        <div class="row"><b>Year 3 — $6.0M</b> · ~10 heads after Gate 2 (2nd higher-ed AE, Midwest AE, SE #2)</div>
+        <div class="row" style="color:var(--muted)">Best case: Y3 new ARR (~$9.6M) ≈ 1.6× Y3 spend. Worst case: exposure capped at ~$1.9M/yr if gates never open.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Scaling gates</h2>
+  <div class="gates">
+    <div class="card gate"><b>Gate 1 · month 12–15</b>
+      <div class="row"><b>Trigger:</b> ≥$1.5M ARR + ≥$6M qualified pipeline + GovRAMP Ready</div>
+      <div class="row"><b>Unlocks:</b> AE 4 + AE 5, first dedicated SE, channel manager (team of 7)</div>
+      <div class="row" style="color:var(--muted)">Missed → hold at 3, fix territory/message, re-test in 2 quarters.</div>
+    </div>
+    <div class="card gate"><b>Gate 2 · month 24</b>
+      <div class="row"><b>Trigger:</b> ≥$5M ARR</div>
+      <div class="row"><b>Unlocks:</b> 2nd higher-ed AE, Midwest AE, SE #2 (team of ~10)</div>
+      <div class="row" style="color:var(--muted)">Missed → hold at 7, harvest 150% NRR expansion before adding coverage.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Three sellers, three patches</h2>
+  <p class="note">Tier counts update live from targets.csv in this repo.</p>
+  <div class="grid2" id="terrcards">
+    <div class="card terr" data-terr="AE1 West/Central"><div class="tt">AE 1 — SLG West/Central</div><div class="cnt">…</div>
+      <ul><li><b>Texas anchor:</b> TX-RAMP provisional + DIR = fastest money in SLED</li><li>GovRAMP-mandate states (AZ · NV · UT) = compliance-gated greenfield</li><li>California halo: the Anthropic deal reaches every CA city & county</li></ul></div>
+    <div class="card terr" data-terr="AE2 East"><div class="tt">AE 2 — SLG East</div><div class="cnt">…</div>
+      <ul><li><b>Florida first</b> + NC's GovRAMP mandate (full enforcement Apr 2027)</li><li>AI-deployment states: MA (ChatGPT, 40K), PA, NJ, MD (Gemini, 43K)</li><li>NY / NYC seeded Year 1, harvested months 24–36</li></ul></div>
+    <div class="card terr" data-terr="AE3 Higher Ed"><div class="tt">AE 3 — Higher Ed (national)</div><div class="cnt">…</div>
+      <ul><li>AI-forward systems first: CSU (470K ChatGPT Edu), Indiana, ASU, Northeastern</li><li>Pentagon-audit & CMMC-exposed R1s; breach-driven privates (Columbia, UPenn)</li><li>System deals multiply: UT, A&M, SUNY, UC — via E&I / HECVAT, not RFP grinds</li></ul></div>
+    <div class="card terr" data-terr="Channel-led"><div class="tt">Channel-led — K-12 + authorities</div><div class="cnt">…</div>
+      <ul><li>No field selling in Year 1 — CDW-G/SHI on TIPS, OMNIA, PEPPM</li><li>E-Rate cyber pilot funds; BigID-precedent districts (Dallas, Frisco, Clark Co.)</li></ul></div>
+  </div>
+</section>
+
+<section>
+  <h2>The first ten calls</h2>
+  <ol class="calls">
+    <li><b>Texas DIR</b> — TRAIGA AI-inventory mandate + 27 AI co-op contracts</li>
+    <li><b>Massachusetts EOTSS</b> — ChatGPT across the whole executive branch (~40K)</li>
+    <li><b>North Carolina DIT</b> — GovRAMP mandatory for all cloud by Apr 2027</li>
+    <li><b>California State University</b> — 470K-student AI system, 23 campuses, one contract</li>
+    <li><b>Maryland DoIT</b> — 43K on Gemini and a standing BigID NASPO purchase</li>
+    <li><b>Pennsylvania OA</b> — ChatGPT across 35 agencies, public AI governance board</li>
+    <li><b>University of Texas System</b> — 14 institutions, audit-list flagship, TX-RAMP applies</li>
+    <li><b>Johns Hopkins (+APL)</b> — $4.1B research estate, the largest in US higher ed</li>
+    <li><b>Arizona DOA/AZDOHS</b> — GovRAMP-mandate state with a running GenAI program</li>
+    <li><b>Columbia / UPenn</b> — breach-driven mandates to map and protect data now</li>
+  </ol>
+</section>
+
+<section>
+  <h2>Compliance clock</h2>
+  <div class="clock">
+    <span><b>Now:</b> TX-RAMP provisional (free, weeks)</span>
+    <span><b>Mo 6–9:</b> GovRAMP Ready via Fast Track (&lt;$25K)</span>
+    <span><b>Live:</b> NASPO Cloud &amp; Software vehicle · CMS ARC-AMPE</span>
+    <span><b>Nov 2026:</b> CMMC Phase 2 in DoD awards</span>
+    <span><b>Apr 2027:</b> NC GovRAMP full enforcement</span>
+    <span><b>Oct 2027:</b> CJIS v6.0 full enforcement</span>
+  </div>
+</section>
+
+<section id="targets">
+  <h2>Prime target list</h2>
+  <p class="note">All 91 entries (~105 organizations), loaded live from <a href="https://github.com/srea222/cyera-sled-targets/blob/main/targets.csv">targets.csv</a>. Click a column header to sort.</p>
+  <div class="filters">
+    <input id="q" type="search" placeholder="Search accounts, triggers, vehicles…">
+    <select id="fterr"><option value="">All territories</option><option>AE1 West/Central</option><option>AE2 East</option><option>AE3 Higher Ed</option><option>Channel-led</option></select>
+    <select id="ftier"><option value="">All tiers</option><option value="1">Tier 1 — pursue now</option><option value="2">Tier 2 — months 6–18</option><option value="3">Tier 3 — seed</option></select>
+  </div>
+  <div class="tblbox"><table id="ttable">
+    <thead><tr><th data-k="rank">#</th><th data-k="account">Account</th><th data-k="state">St</th><th data-k="territory">Territory</th><th data-k="tier">Tier</th><th data-k="acv">ACV band</th><th data-k="why_now">Why now</th><th data-k="vehicle">Contract path</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+  <div class="count" id="count">Loading targets.csv…</div>
+</section>
+
+<section>
+  <h2>Risk, in one line</h2>
+  <div class="risk"><b>The gates are the risk management:</b> miss Gate 1 and exposure is ~$1.9M/yr — a rounding error against the ~$1.4B Cyera raised in 2026 — while the option on a $220M market stays open. Top external risks: Varonis's GovRAMP head start, Purview bundling, and the borrowed-SE model starving POVs (fixed by SLA + partner SEs, with a dedicated SE as the first Gate-1 hire).</div>
+</section>
+
+<footer>
+  Cyera SLED plan v2 · October 2026 · Built from public sources — verify budget cycles and vehicle status at pursuit time. Companion assets: business plan (project doc), exec deck v2, and this repo's territory briefs.
+</footer>
+</div>
+
+<script>
+/* ---- ARR chart (grouped bars, worst/best) ---- */
+const DATA=[{y:"Year 1",w:0.5,b:2.0,s:1.9},{y:"Year 2",w:2.5,b:8.0,s:4.0},{y:"Year 3",w:6.5,b:21.5,s:6.0}];
+const box=document.getElementById("arrchart"),tip=document.getElementById("tip");
+function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+function drawChart(){
+  const W=box.clientWidth||600,H=250,M={t:16,r:8,b:26,l:40},max=24;
+  const iw=W-M.l-M.r,ih=H-M.t-M.b,teal=cssVar("--teal"),purp=cssVar("--vpurple");
+  const yv=v=>M.t+ih-(v/max)*ih;
+  let s='<svg width="100%" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Exit ARR by year, worst and best case">';
+  for(const g of [0,6,12,18,24]){const yy=yv(g);
+    s+='<line x1="'+M.l+'" x2="'+(W-M.r)+'" y1="'+yy+'" y2="'+yy+'" stroke="'+cssVar("--line")+'" stroke-width="1"/>';
+    s+='<text x="'+(M.l-8)+'" y="'+(yy+4)+'" text-anchor="end">$'+g+'M</text>';}
+  const gw=iw/DATA.length,bw=Math.min(34,gw*0.26),gap=6;
+  DATA.forEach((d,i)=>{const cx=M.l+gw*i+gw/2;
+    const x1=cx-bw-gap/2,x2=cx+gap/2;
+    s+='<rect class="bar" data-i="'+i+'" x="'+x1+'" width="'+bw+'" y="'+yv(d.w)+'" height="'+(yv(0)-yv(d.w))+'" rx="4" fill="'+teal+'"/>';
+    s+='<rect class="bar" data-i="'+i+'" x="'+x2+'" width="'+bw+'" y="'+yv(d.b)+'" height="'+(yv(0)-yv(d.b))+'" rx="4" fill="'+purp+'"/>';
+    s+='<text class="val" x="'+(x1+bw/2)+'" y="'+(yv(d.w)-6)+'" text-anchor="middle">$'+d.w+'M</text>';
+    s+='<text class="val" x="'+(x2+bw/2)+'" y="'+(yv(d.b)-6)+'" text-anchor="middle">$'+d.b+'M</text>';
+    s+='<text x="'+cx+'" y="'+(H-8)+'" text-anchor="middle">'+d.y+'</text>';});
+  s+='</svg>';box.innerHTML=s;
+  box.querySelectorAll(".bar").forEach(r=>{
+    r.addEventListener("mousemove",e=>{const d=DATA[+r.dataset.i];
+      tip.innerHTML="<b>"+d.y+"</b><br>Worst $"+d.w+"M · Best $"+d.b+"M<br>Spend $"+d.s+"M";
+      const bb=box.parentElement.getBoundingClientRect();
+      tip.style.display="block";tip.style.left=Math.min(e.clientX-bb.left+12,bb.width-170)+"px";tip.style.top=(e.clientY-bb.top+12)+"px";});
+    r.addEventListener("mouseleave",()=>tip.style.display="none");});
+}
+drawChart();addEventListener("resize",drawChart);
+if(matchMedia) matchMedia("(prefers-color-scheme: dark)").addEventListener("change",drawChart);
+
+/* ---- Target table from targets.csv ---- */
+function parseCSV(t){const rows=[];let row=[],f="",q=false;
+  for(let i=0;i<t.length;i++){const c=t[i];
+    if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+    else if(c==='"')q=true;
+    else if(c===","){row.push(f);f=""}
+    else if(c==="\n"){row.push(f);f="";if(row.length>1||row[0]!=="")rows.push(row);row=[]}
+    else if(c!=="\r")f+=c}
+  if(f!==""||row.length){row.push(f);rows.push(row)}
+  return rows}
+let TROWS=[],sortK="rank",sortAsc=true;
+const tbody=document.querySelector("#ttable tbody"),countEl=document.getElementById("count");
+function esc(x){const d=document.createElement("div");d.textContent=x;return d.innerHTML}
+function render(){
+  const q=document.getElementById("q").value.toLowerCase(),
+        ft=document.getElementById("fterr").value,fr=document.getElementById("ftier").value;
+  let rows=TROWS.filter(r=>(!ft||r.territory===ft)&&(!fr||r.tier===fr)&&(!q||(r.account+" "+r.why_now+" "+r.vehicle+" "+r.compliance+" "+r.state).toLowerCase().includes(q)));
+  rows.sort((a,b)=>{let x=a[sortK],y=b[sortK];
+    if(sortK==="rank"||sortK==="tier"){x=+x;y=+y}
+    return (x<y?-1:x>y?1:0)*(sortAsc?1:-1)});
+  tbody.innerHTML=rows.map(r=>'<tr><td>'+esc(r.rank)+'</td><td class="acct">'+esc(r.account)+'</td><td>'+esc(r.state)+'</td><td>'+esc(r.territory)+'</td><td><span class="pill t'+esc(r.tier)+'">T'+esc(r.tier)+'</span></td><td style="white-space:nowrap">'+esc(r.acv)+'</td><td class="why">'+esc(r.why_now)+'</td><td>'+esc(r.vehicle)+'</td></tr>').join("");
+  countEl.textContent=rows.length+" of "+TROWS.length+" entries shown";
+}
+fetch("targets.csv").then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>{
+  const rows=parseCSV(t),head=rows[0];
+  TROWS=rows.slice(1).map(r=>{const o={};head.forEach((h,i)=>o[h]=r[i]||"");return o});
+  const counts={};
+  TROWS.forEach(r=>{(counts[r.territory]=counts[r.territory]||{1:0,2:0,3:0})[r.tier]++});
+  document.querySelectorAll("#terrcards .terr").forEach(c=>{
+    const k=c.dataset.terr,n=counts[k]||{1:0,2:0,3:0};
+    c.querySelector(".cnt").textContent="Tier 1: "+n[1]+" · Tier 2: "+n[2]+" · Tier 3: "+n[3];});
+  render();
+}).catch(()=>{countEl.innerHTML='Couldn\'t load targets.csv in this view — open the <a href="https://github.com/srea222/cyera-sled-targets/blob/main/targets.csv">CSV on GitHub</a>.'});
+["q","fterr","ftier"].forEach(id=>document.getElementById(id).addEventListener("input",render));
+document.querySelectorAll("#ttable th").forEach(th=>th.addEventListener("click",()=>{
+  const k=th.dataset.k;if(sortK===k)sortAsc=!sortAsc;else{sortK=k;sortAsc=true}render();}));
+</script>
+</body>
+</html>
